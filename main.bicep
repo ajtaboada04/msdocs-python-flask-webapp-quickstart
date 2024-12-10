@@ -20,7 +20,10 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existin
   name: containerRegistryName
 }
 
-var acrCredentials = listCredentials(acr.id, '2023-01-01-preview')
+resource acrCredentials 'Microsoft.ContainerRegistry/registries/listCredentials/action' = {
+  name: containerRegistryName
+  parent: acr
+}
 
 module acrModule 'modules/acr.bicep' = {
   name: 'acrDeployment'
@@ -61,8 +64,8 @@ module webApp 'modules/webApp.bicep' = {
       appSettingsKeyValuePairs: {
         WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
         DOCKER_REGISTRY_SERVER_URL: acr.properties.loginServer
-        DOCKER_REGISTRY_SERVER_USERNAME: acrCredentials.username
-        DOCKER_REGISTRY_SERVER_PASSWORD: acrCredentials.passwords[0].value
+        DOCKER_REGISTRY_SERVER_USERNAME: acrCredentials.properties.username
+        DOCKER_REGISTRY_SERVER_PASSWORD: acrCredentials.properties.passwords[0].value
       }
     }
   }
