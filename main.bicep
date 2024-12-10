@@ -16,7 +16,11 @@ param containerRegistryImageName string
 @description('Container Registry Image Version')
 param containerRegistryImageVersion string
 
-module acr 'modules/acr.bicep' = {
+resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
+  name: containerRegistryName
+}
+
+module acrModule 'modules/acr.bicep' = {
   name: 'acrDeployment'
   params: {
     name: containerRegistryName
@@ -54,9 +58,9 @@ module webApp 'modules/webApp.bicep' = {
       appCommandLine: ''
       appSettingsKeyValuePairs: {
         WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
-        DOCKER_REGISTRY_SERVER_URL: acr.outputs.acrLoginServer
+        DOCKER_REGISTRY_SERVER_URL: acrModule.outputs.acrLoginServer
         DOCKER_REGISTRY_SERVER_USERNAME: containerRegistryName
-        DOCKER_REGISTRY_SERVER_PASSWORD: listCredentials(acr.outputs.acrName, '2023-01-01-preview').passwords[0].value
+        DOCKER_REGISTRY_SERVER_PASSWORD: listCredentials(acr.id, '2023-01-01-preview').passwords[0].value
       }
     }
   }
