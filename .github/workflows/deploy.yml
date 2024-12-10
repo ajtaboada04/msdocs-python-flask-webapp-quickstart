@@ -65,22 +65,44 @@ jobs:
           resourceGroupName: ${{ env.RESOURCE_GROUP_DEV }}
           template: ./main.bicep
           parameters: |
-            appServicePlanName=appServicePlan
-            keyVaultName=ataboada-kv
-            keyVaultRoleAssignments=[
-              {
-                principalId: '25d8d697-c4a2-479f-96e0-15593a830ae5'
-                roleDefinitionIdOrName: 'Key Vault Secrets User'
-                principalType: 'ServicePrincipal'
+            {
+              "appServicePlanName": {
+                "value": "appServicePlan"
+              },
+              "keyVaultName": {
+                "value": "ataboada-kv"
+              },
+              "keyVaultRoleAssignments": {
+                "value": [
+                  {
+                    "principalId": "25d8d697-c4a2-479f-96e0-15593a830ae5",
+                    "roleDefinitionIdOrName": "Key Vault Secrets User",
+                    "principalType": "ServicePrincipal"
+                  }
+                ]
+              },
+              "containerRegistryName": {
+                "value": "ataboada-acr"
+              },
+              "containerRegistryUsernameSecretName": {
+                "value": "ataboada-acr-username"
+              },
+              "containerRegistryPassword0SecretName": {
+                "value": "ataboada-acr-password0"
+              },
+              "containerRegistryPassword1SecretName": {
+                "value": "ataboada-acr-password1"
+              },
+              "containerName": {
+                "value": "ataboada-appservice"
+              },
+              "dockerRegistryImageName": {
+                "value": "ataboada-image"
+              },
+              "dockerRegistryImageVersion": {
+                "value": "latest"
               }
-            ]
-            containerRegistryName=ataboada-acr
-            containerRegistryUsernameSecretName=ataboada-acr-username
-            containerRegistryPassword0SecretName=ataboada-acr-password0
-            containerRegistryPassword1SecretName=ataboada-acr-password1
-            containerName=ataboada-appservice
-            dockerRegistryImageName=ataboada-image
-            dockerRegistryImageVersion=latest
+            }
 
   build-push-image:
     runs-on: ubuntu-latest
