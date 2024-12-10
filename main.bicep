@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 // App Service Plan
 param appServicePlanName string 
 
-module appServicePlan 'modules/asp.bicep' = {
+module appServicePlan 'modules/app-service-plan.bicep' = {
   name: 'appServicePlan-${userAlias}'
   params: {
     name: appServicePlanName
@@ -17,7 +17,7 @@ module appServicePlan 'modules/asp.bicep' = {
 param keyVaultName string
 param keyVaultRoleAssignments array
 
-module keyVault 'modules/keyvault.bicep' = {
+module keyVault 'modules/key-vault.bicep' = {
   name: 'keyVault-${userAlias}'
   params: {
     name: keyVaultName
@@ -32,7 +32,7 @@ param containerRegistryUsernameSecretName string
 param containerRegistryPassword0SecretName string 
 param containerRegistryPassword1SecretName string 
 
-module containerRegistry 'modules/acr.bicep' = {
+module containerRegistry 'modules/container-registry.bicep' = {
   name: 'containerRegistry-${userAlias}'
   params: {
     name: containerRegistryName
