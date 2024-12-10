@@ -60,7 +60,7 @@ module webApp 'modules/webApp.bicep' = {
         WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
         DOCKER_REGISTRY_SERVER_URL: acrModule.outputs.acrLoginServer
         DOCKER_REGISTRY_SERVER_USERNAME: containerRegistryName
-        DOCKER_REGISTRY_SERVER_PASSWORD: listCredentials(acr.id, '2023-01-01-preview').passwords[0].value
+        DOCKER_REGISTRY_SERVER_PASSWORD: acrCredentials.passwords[0].value
       }
     }
   }
