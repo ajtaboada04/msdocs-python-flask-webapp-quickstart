@@ -21,5 +21,5 @@ param containerRegistryPassword1SecretName = 'ataboada-acr-password1'
 
 // Container App Service
 param containerName = 'ataboada-appservice'
-param dockerRegistryImageName = 'ataboada-image'
+param dockerRegistryImageName = 'ataboada-dockerimg'
 param dockerRegistryImageVersion = 'latest'
