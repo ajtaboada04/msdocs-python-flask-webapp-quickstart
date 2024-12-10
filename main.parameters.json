@@ -1,21 +1,24 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
       "containerRegistryName": {
-        "value": "andresContainerRegistry"
-      },
-      "containerRegistryImageName": {
-        "value": "andresImage"
-      },
-      "containerRegistryImageVersion": {
-        "value": "v1"
+          "value": "ataboadaacr"
       },
       "appServicePlanName": {
-        "value": "andresAppServicePlan"
+          "value": "ataboada-app-service-plan"
       },
       "webAppName": {
-        "value": "andresWebApp"
+          "value": "ataboada-web-app"
+      },
+      "location": {
+          "value": "eastus"
+      },
+      "containerRegistryImageName": {
+          "value": "myapp"
+      },
+      "containerRegistryImageVersion": {
+          "value": "latest"
       }
-    }
   }
+}

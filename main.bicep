@@ -1,12 +1,23 @@
-param location string = resourceGroup().location
+@description('Name of the Azure Container Registry')
 param containerRegistryName string
-param containerRegistryImageName string
-param containerRegistryImageVersion string
+
+@description('Name of the App Service Plan')
 param appServicePlanName string
+
+@description('Name of the Web App')
 param webAppName string
 
+@description('Location for all resources')
+param location string = resourceGroup().location
+
+@description('Container Registry Image Name')
+param containerRegistryImageName string
+
+@description('Container Registry Image Version')
+param containerRegistryImageVersion string
+
 module acr 'modules/acr.bicep' = {
-  name: 'deployAcr'
+  name: 'acrDeployment'
   params: {
     name: containerRegistryName
     location: location
@@ -15,7 +26,7 @@ module acr 'modules/acr.bicep' = {
 }
 
 module appServicePlan 'modules/appServicePlan.bicep' = {
-  name: 'deployAppServicePlan'
+  name: 'appServicePlanDeployment'
   params: {
     name: appServicePlanName
     location: location
@@ -26,38 +37,27 @@ module appServicePlan 'modules/appServicePlan.bicep' = {
       size: 'B1'
       tier: 'Basic'
     }
-    kind: 'Linux'
+    kind: 'linux'
     reserved: true
   }
 }
 
 module webApp 'modules/webApp.bicep' = {
-  name: 'deployWebApp'
+  name: 'webAppDeployment'
   params: {
     name: webAppName
     location: location
     kind: 'app'
-    serverFarmResourceId: appServicePlan.outputs.id
+    serverFarmResourceId: appServicePlan.outputs.appServicePlanId
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${acr.outputs.loginServer}/${containerRegistryImageName}:${containerRegistryImageVersion}'
-      appSettings: [
-        {
-          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
-          value: 'false'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_URL'
-          value: 'https://${acr.outputs.loginServer}'
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
-          value: listCredentials(acr.outputs.id, '2019-05-01').username
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: listCredentials(acr.outputs.id, '2019-05-01').passwords[0].value
-        }
-      ]
+      linuxFxVersion: 'DOCKER|${containerRegistryName}.azurecr.io/${containerRegistryImageName}:${containerRegistryImageVersion}'
+      appCommandLine: ''
+      appSettingsKeyValuePairs: {
+        WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
+        DOCKER_REGISTRY_SERVER_URL: acr.outputs.acrLoginServer
+        DOCKER_REGISTRY_SERVER_USERNAME: containerRegistryName
+        DOCKER_REGISTRY_SERVER_PASSWORD: listCredentials(acr.outputs.acrName, '2023-01-01-preview').passwords[0].value
+      }
     }
   }
 }

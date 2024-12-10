@@ -1,19 +1,21 @@
-name: Deploy to Azure
+name: Deploy Bicep to Azure
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+env:
+  RESOURCE_GROUP: BCSAI2024-DEVOPS-STUDENTS-A-DEV
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - name: Log in to Azure
+    - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -21,8 +23,9 @@ jobs:
     - name: Deploy Bicep
       uses: azure/arm-deploy@v1
       with:
-        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        resourceGroupName: 'BCSAI2024-DEVOPS-STUDENTS-A-DEV'
-        template: './main.bicep'
-        parameters: '@main.parameters.json'
-        deploymentMode: 'Incremental'
+        resourceGroupName: ${{ env.RESOURCE_GROUP }}
+        template: ./main.bicep
+        parameters: ./main.parameters.json
+
+    - name: Azure logout
+      run: az logout

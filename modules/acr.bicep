@@ -1,8 +1,13 @@
+@description('Name of the Azure Container Registry')
 param name string
-param location string
-param acrAdminUserEnabled bool
 
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-preview' = {
+@description('Location for the Azure Container Registry')
+param location string = resourceGroup().location
+
+@description('Enable admin user')
+param acrAdminUserEnabled bool = true
+
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
   name: name
   location: location
   sku: {
@@ -13,5 +18,5 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-pr
   }
 }
 
-output loginServer string = containerRegistry.properties.loginServer
-output id string = containerRegistry.id
+output acrLoginServer string = containerRegistry.properties.loginServer
+output acrName string = containerRegistry.name
