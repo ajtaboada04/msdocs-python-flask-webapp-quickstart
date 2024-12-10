@@ -39,14 +39,25 @@ module webApp 'modules/webApp.bicep' = {
     kind: 'app'
     serverFarmResourceId: appServicePlan.outputs.id
     siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistryName}.azurecr.io/${containerRegistryImageName}:${containerRegistryImageVersion}'
-      appCommandLine: ''
-      appSettingsKeyValuePairs: {
-        WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
-        DOCKER_REGISTRY_SERVER_URL: 'https://${acr.outputs.loginServer}'
-        DOCKER_REGISTRY_SERVER_USERNAME: listCredentials(containerRegistryName, '2019-05-01').username
-        DOCKER_REGISTRY_SERVER_PASSWORD: listCredentials(containerRegistryName, '2019-05-01').passwords[0].value
-      }
+      linuxFxVersion: 'DOCKER|${acr.outputs.loginServer}/${containerRegistryImageName}:${containerRegistryImageVersion}'
+      appSettings: [
+        {
+          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
+          value: 'false'
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_URL'
+          value: 'https://${acr.outputs.loginServer}'
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
+          value: listCredentials(acr.outputs.id, '2019-05-01').username
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
+          value: listCredentials(acr.outputs.id, '2019-05-01').passwords[0].value
+        }
+      ]
     }
   }
 }

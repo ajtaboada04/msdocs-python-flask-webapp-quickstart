@@ -24,4 +24,5 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: 'BCSAI2024-DEVOPS-STUDENTS-A-DEV'
         template: './main.bicep'
-        parameters: './main.parameters.json'
+        parameters: '@main.parameters.json'
+        deploymentMode: 'Incremental'
