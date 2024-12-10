@@ -13,5 +13,4 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-pr
   }
 }
 
-output adminUsername string = containerRegistry.properties.adminUser.username
-output adminPassword string = listKeys(containerRegistry.id, '2021-06-01-preview').passwords[0].value
+output loginServer string = containerRegistry.properties.loginServer
