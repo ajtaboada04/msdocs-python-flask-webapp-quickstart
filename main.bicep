@@ -60,8 +60,8 @@ module webApp 'modules/webApp.bicep' = {
       appCommandLine: ''
       appSettingsKeyValuePairs: {
         WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
-        DOCKER_REGISTRY_SERVER_URL: acrModule.outputs.acrLoginServer
-        DOCKER_REGISTRY_SERVER_USERNAME: containerRegistryName
+        DOCKER_REGISTRY_SERVER_URL: acr.properties.loginServer
+        DOCKER_REGISTRY_SERVER_USERNAME: acrCredentials.username
         DOCKER_REGISTRY_SERVER_PASSWORD: acrCredentials.passwords[0].value
       }
     }
