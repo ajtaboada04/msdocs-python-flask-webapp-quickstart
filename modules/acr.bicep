@@ -14,3 +14,4 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2021-06-01-pr
 }
 
 output loginServer string = containerRegistry.properties.loginServer
+output id string = containerRegistry.id
