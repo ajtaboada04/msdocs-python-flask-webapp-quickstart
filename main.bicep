@@ -49,7 +49,7 @@ param containerName string
 param dockerRegistryImageName string
 param dockerRegistryImageVersion string
 
-resource keyVaultReference 'Microsoft.KeyVault/vaults@2024-04-01-preview'existing = {
+resource keyVaultReference 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
   name: keyVaultName
 }
 
