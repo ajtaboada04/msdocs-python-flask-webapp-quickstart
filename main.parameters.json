@@ -1,0 +1,21 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "containerRegistryName": {
+        "value": "andresContainerRegistry"
+      },
+      "containerRegistryImageName": {
+        "value": "myImage"
+      },
+      "containerRegistryImageVersion": {
+        "value": "v1"
+      },
+      "appServicePlanName": {
+        "value": "andresAppServicePlan"
+      },
+      "webAppName": {
+        "value": "andresWebApp"
+      }
+    }
+  }
