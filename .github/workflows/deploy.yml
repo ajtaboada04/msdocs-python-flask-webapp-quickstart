@@ -1,4 +1,4 @@
-name: Deploy Container
+name: safebank-infra
 
 on:
   workflow_dispatch:
@@ -6,11 +6,12 @@ on:
     branches:
       - main
   push:
-    branches:
-      - 'main'
+      branches:
+        - 'main'
 
 env:
-  DOCKER_REGISTRY_SERVER_URL: ataboadaacr.azurecr.io
+
+  DOCKER_REGISTRY_SERVER_URL: ataboada-acr.azurecr.io
   KEY_VAULT_NAME: ataboada-kv
   IMAGE_NAME: ataboada-image
   APP_SERVICE_NAME: ataboada-appservice
@@ -25,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout code
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@main
       # Lint Bicep code 
       - name: Run Bicep linter
         run: az bicep build --file ./main.bicep
@@ -36,73 +37,39 @@ jobs:
           name: bicep-build
           path: ./main.bicep 
       
-      # Checkout the repository to the runner.
+        # Checkout the repository to the runner.
       - name: Checkout
         uses: actions/checkout@v3
+
 
   deploy-infra:
     runs-on: ubuntu-latest
     needs: build-infra
 
     steps:
-      - uses: actions/checkout@v3
+
+    - uses: actions/checkout@main
   
-      - name: Download Bicep build artifact
-        uses: actions/download-artifact@v3
-        with:
+    - name: Download Bicep build artifact
+      uses: actions/download-artifact@v3
+      with:
           name: bicep-build
     
       # Log into Azure
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: deploy
-        uses: azure/arm-deploy@v2
-        with:
-          scope: resourcegroup
-          subscriptionId: ${{ env.SUBSCRIPTION_ID_DEV }}
-          resourceGroupName: ${{ env.RESOURCE_GROUP_DEV }}
-          template: ./main.bicep
-          parameters: |
-            {
-              "appServicePlanName": {
-                "value": "appServicePlan"
-              },
-              "keyVaultName": {
-                "value": "ataboada-kv"
-              },
-              "keyVaultRoleAssignments": {
-                "value": [
-                  {
-                    "principalId": "25d8d697-c4a2-479f-96e0-15593a830ae5",
-                    "roleDefinitionIdOrName": "Key Vault Secrets User",
-                    "principalType": "ServicePrincipal"
-                  }
-                ]
-              },
-              "containerRegistryName": {
-                "value": "ataboada-acr"
-              },
-              "containerRegistryUsernameSecretName": {
-                "value": "ataboada-acr-username"
-              },
-              "containerRegistryPassword0SecretName": {
-                "value": "ataboada-acr-password0"
-              },
-              "containerRegistryPassword1SecretName": {
-                "value": "ataboada-acr-password1"
-              },
-              "containerName": {
-                "value": "ataboada-appservice"
-              },
-              "dockerRegistryImageName": {
-                "value": "ataboada-image"
-              },
-              "dockerRegistryImageVersion": {
-                "value": "latest"
-              }
-            }
+    - name: deploy
+      uses: azure/arm-deploy@v2
+      with:
+        scope: resourceGroup
+        subscriptionId: ${{ env.SUBSCRIPTION_ID_DEV }}
+        resourceGroupName: ${{ env.RESOURCE_GROUP_DEV }}
+        template: ./main.bicep
+        parameters: >
+          ./parameters.bicepparam
+
 
   build-push-image:
     runs-on: ubuntu-latest
@@ -110,8 +77,9 @@ jobs:
     outputs:
       image-version: ${{ steps.image-version.outputs.version }}
 
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: "Log in to azure"
         uses: azure/login@v2
@@ -137,22 +105,22 @@ jobs:
 
       - name: "Docker build and push image"
         run: |
-          docker build -t ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME }}:${{ steps.image-version.outputs.version }} .
+          docker build -t ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME}}:${{ steps.image-version.outputs.version}} .
           docker login ${{ env.DOCKER_REGISTRY_SERVER_URL }} -u ${{ env.REGISTRY_USERNAME }} -p ${{ env.REGISTRY_PASSWORD }}
-          docker push ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME }}:${{ steps.image-version.outputs.version }}
+          docker push ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME}}:${{ steps.image-version.outputs.version}}
 
   deploy-container:
     runs-on: ubuntu-latest
     needs: build-push-image
     steps:
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Deploy Docker Image to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.APP_SERVICE_NAME }}
-          images: |
-            ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME }}:${{ needs.build-push-image.outputs.image-version }}
+    - name: Deploy Docker Image to Azure Web App
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.APP_SERVICE_NAME }}
+        images: |
+          ${{ env.DOCKER_REGISTRY_SERVER_URL }}/${{ env.IMAGE_NAME }}:${{ needs.build-push-image.outputs.image-version }}
