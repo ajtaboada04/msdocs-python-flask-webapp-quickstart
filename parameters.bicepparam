@@ -15,9 +15,9 @@ param keyVaultRoleAssignments = [
 
 // Container Registry
 param containerRegistryName = 'ataboadaacr'
-param containerRegistryUsernameSecretName = 'ataboada-acr-username'
-param containerRegistryPassword0SecretName = 'ataboada-acr-password0'
-param containerRegistryPassword1SecretName = 'ataboada-acr-password1'
+param containerRegistryUsernameSecretName = 'ataboada-cr-username'
+param containerRegistryPassword0SecretName = 'ataboada-cr-password0'
+param containerRegistryPassword1SecretName = 'ataboada-cr-password1'
 
 // Container App Service
 param containerName = 'ataboada-appservice'
