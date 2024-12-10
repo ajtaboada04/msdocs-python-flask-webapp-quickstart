@@ -6,7 +6,7 @@
         "value": "andresContainerRegistry"
       },
       "containerRegistryImageName": {
-        "value": "myImage"
+        "value": "andresImage"
       },
       "containerRegistryImageVersion": {
         "value": "v1"
