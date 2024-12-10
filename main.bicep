@@ -5,7 +5,7 @@ param location string = resourceGroup().location
 // App Service Plan
 param appServicePlanName string 
 
-module appServicePlan 'modules/appServicePlan.bicep' = {
+module appServicePlan 'modules/asp.bicep' = {
   name: 'appServicePlan-${userAlias}'
   params: {
     name: appServicePlanName
@@ -49,11 +49,11 @@ param containerName string
 param dockerRegistryImageName string
 param dockerRegistryImageVersion string
 
-resource keyVaultReference 'Microsoft.KeyVault/vaults@2024-04-01-preview' existing = {
+resource keyVaultReference 'Microsoft.KeyVault/vaults@2023-07-01'existing = {
   name: keyVaultName
 }
 
-module containerAppService 'modules/containerAppService.bicep' = {
+module containerAppService 'modules/container-appservice.bicep' = {
   name: 'containerAppService-${userAlias}'
   params: {
     name: containerName
