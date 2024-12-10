@@ -1,72 +1,69 @@
-@description('Name of the Azure Container Registry')
-param containerRegistryName string
-
-@description('Name of the App Service Plan')
-param appServicePlanName string
-
-@description('Name of the Web App')
-param webAppName string
-
-@description('Location for all resources')
+param userAlias string = 'ataboada'
 param location string = resourceGroup().location
 
-@description('Container Registry Image Name')
-param containerRegistryImageName string
 
-@description('Container Registry Image Version')
-param containerRegistryImageVersion string
-
-resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
-  name: containerRegistryName
-}
-
-resource acrCredentials 'Microsoft.ContainerRegistry/registries/listCredentials@2023-01-01-preview' = {
-  name: 'listCredentials'
-  parent: acr
-}
-
-module acrModule 'modules/acr.bicep' = {
-  name: 'acrDeployment'
-  params: {
-    name: containerRegistryName
-    location: location
-    acrAdminUserEnabled: true
-  }
-}
+// App Service Plan
+param appServicePlanName string 
 
 module appServicePlan 'modules/appServicePlan.bicep' = {
-  name: 'appServicePlanDeployment'
+  name: 'appServicePlan-${userAlias}'
   params: {
     name: appServicePlanName
     location: location
-    sku: {
-      capacity: 1
-      family: 'B'
-      name: 'B1'
-      size: 'B1'
-      tier: 'Basic'
-    }
-    kind: 'linux'
-    reserved: true
   }
 }
 
-module webApp 'modules/webApp.bicep' = {
-  name: 'webAppDeployment'
+// Key Vault
+param keyVaultName string
+param keyVaultRoleAssignments array
+
+module keyVault 'modules/keyvault.bicep' = {
+  name: 'keyVault-${userAlias}'
   params: {
-    name: webAppName
+    name: keyVaultName
     location: location
-    kind: 'app'
-    serverFarmResourceId: appServicePlan.outputs.appServicePlanId
-    siteConfig: {
-      linuxFxVersion: 'DOCKER|${containerRegistryName}.azurecr.io/${containerRegistryImageName}:${containerRegistryImageVersion}'
-      appCommandLine: ''
-      appSettingsKeyValuePairs: {
-        WEBSITES_ENABLE_APP_SERVICE_STORAGE: false
-        DOCKER_REGISTRY_SERVER_URL: acr.properties.loginServer
-        DOCKER_REGISTRY_SERVER_USERNAME: acrCredentials.properties.username
-        DOCKER_REGISTRY_SERVER_PASSWORD: acrCredentials.properties.passwords[0].value
-      }
-    }
+    roleAssignments: keyVaultRoleAssignments
   }
 }
+
+// Container Registry
+param containerRegistryName string
+param containerRegistryUsernameSecretName string 
+param containerRegistryPassword0SecretName string 
+param containerRegistryPassword1SecretName string 
+
+module containerRegistry 'modules/acr.bicep' = {
+  name: 'containerRegistry-${userAlias}'
+  params: {
+    name: containerRegistryName
+    location: location
+    keyVaultResourceId: keyVault.outputs.keyVaultId
+    usernameSecretName: containerRegistryUsernameSecretName
+    password0SecretName: containerRegistryPassword0SecretName
+    password1SecretName: containerRegistryPassword1SecretName
+  }
+}
+
+// Container App Service
+param containerName string
+param dockerRegistryImageName string
+param dockerRegistryImageVersion string
+
+resource keyVaultReference 'Microsoft.KeyVault/vaults@2024-04-01-preview'existing = {
+  name: keyVaultName
+}
+
+module containerAppService 'modules/containerAppService.bicep' = {
+  name: 'containerAppService-${userAlias}'
+  params: {
+    name: containerName
+    location: location
+    appServicePlanId: appServicePlan.outputs.id
+    registryName: containerRegistryName
+    registryImageName: dockerRegistryImageName
+    registryImageVersion: dockerRegistryImageVersion
+    registryServerUserName: keyVaultReference.getSecret(containerRegistryUsernameSecretName)
+    registryServerPassword: keyVaultReference.getSecret(containerRegistryPassword0SecretName)
+  }
+}
+
