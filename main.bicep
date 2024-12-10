@@ -20,8 +20,8 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existin
   name: containerRegistryName
 }
 
-resource acrCredentials 'Microsoft.ContainerRegistry/registries/listCredentials/action' = {
-  name: containerRegistryName
+resource acrCredentials 'Microsoft.ContainerRegistry/registries/listCredentials@2023-01-01-preview' = {
+  name: 'listCredentials'
   parent: acr
 }
 
