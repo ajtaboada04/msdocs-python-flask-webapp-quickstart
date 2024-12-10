@@ -20,6 +20,8 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existin
   name: containerRegistryName
 }
 
+var acrCredentials = listCredentials(acr.id, '2023-01-01-preview')
+
 module acrModule 'modules/acr.bicep' = {
   name: 'acrDeployment'
   params: {
